@@ -39,17 +39,6 @@ public final class MuleExtensionModelProvider {
 
   public static final String MULE_TLS_NAMESPACE = format(DEFAULT_NAMESPACE_URI_MASK, "tls");
   public static final String MULE_TLS_SCHEMA_LOCATION = "http://www.mulesoft.org/schema/mule/tls/current/mule-tls.xsd";
-  public static final ClassTypeLoader TYPE_LOADER = ExtensionsTypeLoaderFactory.getDefault()
-      .createTypeLoader(MuleExtensionModelProvider.class.getClassLoader());
-
-  public static final BaseTypeBuilder BASE_TYPE_BUILDER = BaseTypeBuilder.create(JAVA);
-  public static final MetadataType STRING_TYPE = BASE_TYPE_BUILDER.stringType().build();
-  public static final MetadataType INTEGER_TYPE = TYPE_LOADER.load(Integer.class);
-  public static final MetadataType BOOLEAN_TYPE = TYPE_LOADER.load(boolean.class);
-  public static final MetadataType OBJECT_TYPE = BASE_TYPE_BUILDER.objectType().build();
-  public static final MetadataType ANY_TYPE = BASE_TYPE_BUILDER.anyType().build();
-  public static final MetadataType VOID_TYPE = TYPE_LOADER.load(void.class);
-  public static final MetadataType OBJECT_STORE_TYPE = TYPE_LOADER.load(ObjectStore.class);
 
   static {
     try {
@@ -71,6 +60,12 @@ public final class MuleExtensionModelProvider {
                                                  MuleExtensionModelProvider.class.getClassLoader(),
                                                  new NullDslResolvingContext())));
 
+  private static final LazyValue<ExtensionModel> OPERATION_DSL_EXTENSION_MODEL = new LazyValue<>(() ->
+          new ExtensionModelFactory().create(new DefaultExtensionLoadingContext(
+                  new OperationDslExtensionModelDeclarer().declareExtensionModel(),
+                  MuleExtensionModelProvider.class.getClassLoader(),
+                  new NullDslResolvingContext())));
+
   /**
    * @return the {@link ExtensionModel} definition for Mule's Runtime
    */
@@ -83,5 +78,13 @@ public final class MuleExtensionModelProvider {
    */
   public static ExtensionModel getTlsExtensionModel() {
     return TLS_EXTENSION_MODEL.get();
+  }
+
+  /**
+   * @return the {@link ExtensionModel} definition containing the namespace declaration for the operation declaration DSL
+   * @since 4.4.0
+   */
+  public static ExtensionModel getOperationDslExtensionModel() {
+    return OPERATION_DSL_EXTENSION_MODEL.get();
   }
 }
