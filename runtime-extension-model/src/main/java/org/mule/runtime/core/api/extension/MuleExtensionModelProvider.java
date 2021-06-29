@@ -71,11 +71,11 @@ public final class MuleExtensionModelProvider {
                                                  MuleExtensionModelProvider.class.getClassLoader(),
                                                  new NullDslResolvingContext())));
 
-  private static final LazyValue<ExtensionModel> OPERATION_DSL_EXTENSION_MODEL = new LazyValue<>(() ->
-          new ExtensionModelFactory().create(new DefaultExtensionLoadingContext(
-                  new OperationDslExtensionModelDeclarer().declareExtensionModel(),
-                  MuleExtensionModelProvider.class.getClassLoader(),
-                  new NullDslResolvingContext())));
+  private static final LazyValue<ExtensionModel> OPERATION_DSL_EXTENSION_MODEL = new LazyValue<>(() -> new ExtensionModelFactory()
+      .create(new DefaultExtensionLoadingContext(
+                                                 new OperationDslExtensionModelDeclarer().declareExtensionModel(),
+                                                 MuleExtensionModelProvider.class.getClassLoader(),
+                                                 new NullDslResolvingContext())));
 
   /**
    * @return the {@link ExtensionModel} definition for Mule's Runtime
