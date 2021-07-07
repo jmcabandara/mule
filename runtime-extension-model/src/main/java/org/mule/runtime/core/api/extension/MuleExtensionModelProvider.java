@@ -71,9 +71,9 @@ public final class MuleExtensionModelProvider {
                                                  MuleExtensionModelProvider.class.getClassLoader(),
                                                  new NullDslResolvingContext())));
 
-  private static final LazyValue<ExtensionModel> OPERATION_DSL_EXTENSION_MODEL = new LazyValue<>(() -> new ExtensionModelFactory()
+  private static final LazyValue<ExtensionModel> APP_OPERATION_EXTENSION_MODEL = new LazyValue<>(() -> new ExtensionModelFactory()
       .create(new DefaultExtensionLoadingContext(
-                                                 new OperationDslExtensionModelDeclarer().declareExtensionModel(),
+                                                 new AppOperationExtensionModelDeclarer().declareExtensionModel(),
                                                  MuleExtensionModelProvider.class.getClassLoader(),
                                                  new NullDslResolvingContext())));
 
@@ -95,7 +95,7 @@ public final class MuleExtensionModelProvider {
    * @return the {@link ExtensionModel} definition containing the namespace declaration for the operation declaration DSL
    * @since 4.4.0
    */
-  public static ExtensionModel getOperationDslExtensionModel() {
-    return OPERATION_DSL_EXTENSION_MODEL.get();
+  public static ExtensionModel getAppOperationExtensionModel() {
+    return APP_OPERATION_EXTENSION_MODEL.get();
   }
 }
