@@ -27,6 +27,7 @@ import static org.mule.runtime.core.api.config.bootstrap.ArtifactType.POLICY;
 import static org.mule.runtime.core.api.lifecycle.LifecycleUtils.initialiseIfNeeded;
 import static org.mule.runtime.core.internal.config.RuntimeLockFactoryUtil.getRuntimeLockFactory;
 
+import java.io.IOException;
 import org.mule.runtime.api.component.ConfigurationProperties;
 import org.mule.runtime.api.config.FeatureFlaggingService;
 import org.mule.runtime.api.exception.ErrorTypeRepository;
@@ -39,10 +40,13 @@ import org.mule.runtime.app.declaration.api.ArtifactDeclaration;
 import org.mule.runtime.ast.api.ArtifactAst;
 import org.mule.runtime.ast.api.ComponentAst;
 import org.mule.runtime.ast.api.ImportedResource;
+import org.mule.runtime.ast.api.serialization.ExtensionModelResolver;
 import org.mule.runtime.ast.api.util.AstTraversalDirection;
 import org.mule.runtime.ast.api.util.BaseArtifactAst;
 import org.mule.runtime.ast.api.xml.AstXmlParser;
 import org.mule.runtime.ast.api.xml.AstXmlParser.Builder;
+import org.mule.runtime.ast.internal.serialization.DefaultArtifactAstDeserializer;
+import org.mule.runtime.ast.internal.serialization.json.JsonArtifactAstSerializer;
 import org.mule.runtime.config.api.ArtifactContextFactory;
 import org.mule.runtime.config.internal.artifact.SpringArtifactContext;
 import org.mule.runtime.config.internal.dsl.model.ConfigurationDependencyResolver;
@@ -73,7 +77,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
-import java.util.Spliterator;
 import java.util.function.UnaryOperator;
 import java.util.stream.Stream;
 
@@ -259,12 +262,30 @@ public class SpringXmlConfigurationBuilder extends AbstractResourceConfiguration
         artifactAst = toArtifactast(artifactDeclaration, extensions);
       }
 
-      return artifactAst;
+      return testSerializationDeserialization(extensions, artifactAst);
     } catch (MuleRuntimeException e) {
       throw e;
     } catch (Exception e) {
       throw new MuleRuntimeException(e);
     }
+  }
+
+  private ArtifactAst testSerializationDeserialization(Set<ExtensionModel> extensions, ArtifactAst artifactAst)
+      throws IOException {
+    JsonArtifactAstSerializer jsonArtifactAstSerializer = new JsonArtifactAstSerializer();
+    InputStream inputStream = jsonArtifactAstSerializer.serialize(artifactAst);
+    DefaultArtifactAstDeserializer defaultArtifactAstDeserializer = new DefaultArtifactAstDeserializer();
+    ArtifactAst deserializedArtifactAst = defaultArtifactAstDeserializer.deserialize(inputStream, new ExtensionModelResolver() {
+
+      @Override
+      public ExtensionModel resolve(String name) throws IllegalArgumentException {
+        return extensions.stream().filter(x -> x.getName().equals(name)).findFirst().orElseGet(null);
+      }
+    });
+
+
+    artifactAst = deserializedArtifactAst;
+    return artifactAst;
   }
 
   private AstXmlParser createMuleXmlParser(Set<ExtensionModel> extensions,
