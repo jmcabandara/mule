@@ -144,7 +144,7 @@ public abstract class AbstractReactorStreamProcessingStrategy extends AbstractSt
   }
 
   protected ProfilingService getProfilingService() {
-    return featureFlags.isEnabled(ENABLE_PROFILING_SERVICE) ? profilingService : null;
+    return profilingService;
   }
 
   @Override

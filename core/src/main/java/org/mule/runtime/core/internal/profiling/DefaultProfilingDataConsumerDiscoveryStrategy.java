@@ -8,6 +8,7 @@
 package org.mule.runtime.core.internal.profiling;
 
 import com.google.common.collect.ImmutableSet;
+import org.mule.runtime.api.config.*;
 import org.mule.runtime.api.profiling.ProfilingDataConsumerDiscoveryStrategy;
 import org.mule.runtime.api.profiling.ProfilingDataConsumer;
 import org.mule.runtime.core.internal.profiling.consumer.LoggerComponentProcessingStrategyDataConsumer;
@@ -21,9 +22,15 @@ import java.util.Set;
  */
 public class DefaultProfilingDataConsumerDiscoveryStrategy implements ProfilingDataConsumerDiscoveryStrategy {
 
+  private final FeatureFlaggingService featureFlaggingService;
+
+  public DefaultProfilingDataConsumerDiscoveryStrategy(FeatureFlaggingService featureFlagginService) {
+    this.featureFlaggingService = featureFlagginService;
+  }
+
   @Override
   public Set<ProfilingDataConsumer<?>> discover() {
-    return ImmutableSet.of(new LoggerComponentProcessingStrategyDataConsumer());
+    return ImmutableSet.of(new LoggerComponentProcessingStrategyDataConsumer(featureFlaggingService));
   }
 
 }

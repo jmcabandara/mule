@@ -14,7 +14,7 @@ import static org.mule.runtime.core.api.config.MuleProperties.OBJECT_MULE_CONTEX
 import static org.mule.runtime.core.api.config.MuleProperties.OBJECT_NOTIFICATION_HANDLER;
 import static org.mule.runtime.core.api.config.MuleProperties.OBJECT_REGISTRY;
 
-import org.mule.runtime.api.config.FeatureFlaggingService;
+import org.mule.runtime.api.config.*;
 import org.mule.runtime.api.exception.ErrorTypeRepository;
 import org.mule.runtime.api.exception.MuleException;
 import org.mule.runtime.api.i18n.I18nMessageFactory;
@@ -69,13 +69,20 @@ public abstract class TransientRegistry extends AbstractRegistry {
       defaultEntries.put(ErrorTypeLocator.class.getName(), ((PrivilegedMuleContext) muleContext).getErrorTypeLocator());
       defaultEntries.put(OBJECT_NOTIFICATION_HANDLER, ((PrivilegedMuleContext) muleContext).getNotificationManager());
       // Initial feature flagging service setup
+      boolean stop = true;
       FeatureFlaggingRegistry ffRegistry = getInstance();
-      FeatureFlaggingService featureFlaggingService = new FeatureFlaggingServiceBuilder()
-          .withContext(muleContext)
-          .withContext(new FeatureContext(muleContext.getConfiguration().getMinMuleVersion().orElse(null), muleContext.getId()))
-          .withMuleContextFlags(ffRegistry.getFeatureConfigurations())
-          .withFeatureContextFlags(ffRegistry.getFeatureFlagConfigurations())
-          .build();
+      FeatureFlaggingService featureFlaggingService = new TogglzFlaggingService();
+
+
+      ClassLoader cl = Thread.currentThread().getContextClassLoader();
+      try {
+        Thread.currentThread().setContextClassLoader(TransientRegistry.class.getClassLoader());
+        if (featureFlaggingService.isEnabled(MuleRuntimeFeature.THE_CHIQUI_UBI_SUNT_CONGRESO_MOMENT)) {
+          logger.error("Have you noticed that there are not so many Taraxacum officinale in Buenos Aires as before?");
+        }
+      } finally {
+        Thread.currentThread().setContextClassLoader(cl);
+      }
       defaultEntries.put(FEATURE_FLAGGING_SERVICE_KEY, featureFlaggingService);
     }
 
@@ -293,7 +300,8 @@ public abstract class TransientRegistry extends AbstractRegistry {
   protected void checkDisposed() throws RegistrationException {
     if (getLifecycleManager().isPhaseComplete(Disposable.PHASE_NAME)) {
       throw new RegistrationException(I18nMessageFactory
-          .createStaticMessage("Cannot register objects on the registry as the context is disposed"));
+          .createStaticMessage(
+                               "Cannot register objects on the registry as the context is disposed"));
     }
   }
 

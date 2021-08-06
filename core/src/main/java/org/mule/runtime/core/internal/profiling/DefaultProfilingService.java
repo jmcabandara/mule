@@ -62,7 +62,7 @@ public class DefaultProfilingService extends AbstractProfilingService {
 
   @Override
   public ProfilingDataConsumerDiscoveryStrategy getDiscoveryStrategy() {
-    return new DefaultProfilingDataConsumerDiscoveryStrategy();
+    return new DefaultProfilingDataConsumerDiscoveryStrategy(featureFlagginService);
   }
 
   @Override

@@ -42,6 +42,9 @@ public abstract class AbstractProfilingService implements ProfilingService, Init
   protected ServerNotificationManager notificationManager;
 
   @Inject
+  protected FeatureFlaggingService featureFlagginService;
+
+  @Inject
   private ServerNotificationHandler serverNotificationHandler;
 
   private FeatureFlaggingService featureFlags;
@@ -53,9 +56,7 @@ public abstract class AbstractProfilingService implements ProfilingService, Init
 
   @Override
   public void start() throws MuleException {
-    if (featureFlags.isEnabled(ENABLE_PROFILING_SERVICE)) {
-      registerNotificationListeners(getDiscoveryStrategy().discover());
-    }
+    registerNotificationListeners(getDiscoveryStrategy().discover());
   }
 
   private <S extends ProfilingDataConsumer<T>, T extends ProfilingEventContext> void registerNotificationListeners(Set<S> profilingDataConsumers) {

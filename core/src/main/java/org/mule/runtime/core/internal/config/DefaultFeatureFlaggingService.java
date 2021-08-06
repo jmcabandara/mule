@@ -12,6 +12,8 @@ import java.util.Map;
 import org.mule.runtime.api.config.Feature;
 import org.mule.runtime.api.exception.MuleRuntimeException;
 import org.mule.runtime.api.config.FeatureFlaggingService;
+import org.mule.runtime.core.*;
+import org.togglz.core.context.FeatureContext;
 
 import static java.util.Collections.emptyMap;
 import static org.mule.runtime.api.i18n.I18nMessageFactory.createStaticMessage;
@@ -33,9 +35,6 @@ public class DefaultFeatureFlaggingService implements FeatureFlaggingService {
 
   @Override
   public boolean isEnabled(Feature feature) {
-    if (!features.containsKey(feature)) {
-      throw new MuleRuntimeException(createStaticMessage("Feature %s not registered", feature));
-    }
-    return features.get(feature);
+    return FeatureContext.getFeatureManager().isActive(MuleFeatureProvider.getTogglzFeature(feature));
   }
 }

@@ -17,6 +17,7 @@ import static org.mule.runtime.api.profiling.type.RuntimeProfilingEventTypes.STA
 import static org.mule.runtime.api.profiling.type.RuntimeProfilingEventTypes.STARTING_OPERATION_EXECUTION;
 import static org.slf4j.LoggerFactory.getLogger;
 
+import org.mule.runtime.api.config.*;
 import org.mule.runtime.api.profiling.ProfilingDataConsumer;
 import org.mule.runtime.api.profiling.type.ProfilingEventType;
 import org.mule.runtime.api.profiling.type.context.ProcessingStrategyProfilingEventContext;
@@ -47,13 +48,18 @@ public class LoggerComponentProcessingStrategyDataConsumer
   public static final String LOCATION = "location";
 
   private final Gson gson = new Gson();
+  private final FeatureFlaggingService featureFlaggingService;
+
+  public LoggerComponentProcessingStrategyDataConsumer(FeatureFlaggingService featureFlaggingService) {
+    this.featureFlaggingService = featureFlaggingService;
+  }
 
   @Override
   public void onProfilingEvent(ProfilingEventType<ProcessingStrategyProfilingEventContext> profilingEventType,
                                ProcessingStrategyProfilingEventContext profilingEventContext) {
     Logger logger = getDataConsumerLogger();
-    if (logger.isDebugEnabled()) {
-      logger.debug(gson.toJson(getInfoMap(profilingEventType, profilingEventContext)));
+    if (featureFlaggingService.isEnabled(MuleRuntimeFeature.ENABLE_PROFILING_SERVICE)) {
+      logger.warn(gson.toJson(getInfoMap(profilingEventType, profilingEventContext)));
     }
   }
 
